@@ -6,8 +6,6 @@
 #define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
 #define MAX_SHOP_JOKERS 2 // TODO: Make this dynamic and allow for other items besides jokers
 #define MAX_SELECTION_SIZE 5
-#define MAX_CARD_SCORE_DIGITS 2 // Current digit limit for score received from cards including mult etc. from jokers
-#define MAX_CARD_SCORE_STR_LEN (MAX_CARD_SCORE_DIGITS + 1) // For the '+' or 'X'
 #define FRAMES(x) (((x) + game_speed - 1) / game_speed)
 
  // TODO: Can make these dynamic to support interest-related jokers and vouchers
@@ -52,9 +50,12 @@ enum HandState
 
 enum PlayState
 {
-    PLAY_PLAYING,
+    PLAY_STARTING,
+    PLAY_BEFORE_SCORING,
     PLAY_SCORING_CARDS,
-    PLAY_SCORING_JOKERS,
+    PLAY_SCORING_CARD_JOKERS,
+    PLAY_SCORING_HELD_CARDS,
+    PLAY_SCORING_INDEPENDENT_JOKERS,
     PLAY_ENDING,
     PLAY_ENDED
 };
@@ -91,7 +92,6 @@ void game_init();
 void game_update();
 void game_change_state(enum GameState new_game_state);
 
-// Forward declaration
 struct List; 
 typedef struct List List;
 
@@ -106,9 +106,9 @@ int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
 int             get_scored_card_index(void);
-List*           get_jokers(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
+List*           get_jokers_list(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
