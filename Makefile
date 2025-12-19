@@ -32,6 +32,7 @@ INCLUDES       := include
 DATA           :=
 MUSIC          := audio
 GRAPHICS       := graphics
+FONT           := font
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -42,7 +43,7 @@ GIT_DIRTY := $(shell git diff-index --quiet HEAD -- || echo "-dirty")
 GIT_HASH := $(shell git rev-parse --short HEAD || echo "undef")
 GIT_C_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_DIRTY=\"$(GIT_DIRTY)\"
 
-CFLAGS	:= -g -O3 -Wall -Werror \
+CFLAGS	:= -g -O3 -Wall -Werror -std=gnu23 \
         -mcpu=arm7tdmi -mtune=arm7tdmi \
         -ffast-math -fomit-frame-pointer -funroll-loops \
         $(ARCH)
@@ -82,7 +83,8 @@ export OUTPUT	:=	$(CURDIR)/$(BUILD)/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
+			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(FONT),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -90,6 +92,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
+FONTFILES	:=	$(foreach dir,$(FONT),$(notdir $(wildcard $(dir)/*.png)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 ifneq ($(strip $(MUSIC)),)
@@ -117,7 +120,9 @@ export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 export OFILES_GRAPHICS := $(PNGFILES:.png=.o)
 
-export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_GRAPHICS)
+export OFILES_FONT := $(FONTFILES:.png=.o)
+
+export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_GRAPHICS) $(OFILES_FONT)
 
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(PNGFILES:.png=.h)
 
@@ -130,16 +135,21 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean
 
 #---------------------------------------------------------------------------------
-$(BUILD): 
+$(BUILD): build/gbalatro_sys8.s
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	@echo "$(GIT_HASH)$(GIT_DIRTY)" > $@/githash.txt
 
 #---------------------------------------------------------------------------------
+build/%.s: $(FONT)/%.png
+	@echo Building font
+	@mkdir -p $(BUILD)
+	@python3 scripts/generate_font.py -i $< -o $@
+
+#---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
-
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)

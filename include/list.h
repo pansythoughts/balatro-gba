@@ -1,18 +1,26 @@
-/** @file list.h
+/**
+ * @file list.h
  *
- *  @brief A doubly-linked list
+ * @brief A doubly-linked list
  *
- *  List Implementation
- *  ===================
+ * List Implementation
+ * ===================
  *
- *  - This @ref List operates as a linked list @ref ListNodes. It operates as a regular doubly-linked list
- *  but doesn't allocate memory and rather gets @ref ListNodes from a pool.
- */ 
+ *  - This @ref List operates as a linked list @ref ListNodes. It operates as a regular
+ * doubly-linked list but doesn't allocate memory and rather gets @ref ListNodes from a pool.
+ */
 #ifndef LIST_H
 #define LIST_H
 
 #include <stdbool.h>
 
+/**
+ * @def MAX_LIST_NODES
+ * @brief Number of reserved list nodes.
+ *
+ * Number of list nodes available from the pool of @ref ListNode . This should
+ * be set to to the maximum number of list nodes needed at once.
+ */
 #define MAX_LIST_NODES 128
 
 typedef struct ListNode ListNode;
@@ -23,7 +31,8 @@ typedef struct ListNode ListNode;
 struct ListNode
 {
     /**
-     * @brief The previous @ref ListNode in the associated @ref List, NULL if at the `head` of the list
+     * @brief The previous @ref ListNode in the associated @ref List, NULL if at the `head` of the
+     * list
      */
     ListNode* prev;
 
@@ -64,8 +73,8 @@ typedef struct List
  */
 enum ListItrDirection
 {
-    LIST_ITR_FORWARD,  
-    LIST_ITR_REVERSE,  
+    LIST_ITR_FORWARD,
+    LIST_ITR_REVERSE,
 };
 
 /**
@@ -99,8 +108,9 @@ typedef struct
 /**
  * Create a list.
  *
- * While this function does not allocate memory for the list itself, the list does allocate memory for each element.
- * So every created list must be freed with @ref list_clear to ensure the list's nodes are deleted properly.
+ * While this function does not allocate memory for the list itself, the list does allocate memory
+ * for each element. So every created list must be freed with @ref list_clear to ensure the list's
+ * nodes are deleted properly.
  *
  * @return A @ref List with head and tail reset.
  */
@@ -149,29 +159,29 @@ void list_push_back(List* list, void* data);
  *
  * Performs the following operation:
  *
- *                    ┌─────┐                      
- *                    │ node│                      
- *                    └─────┘                      
- *          ┌─────┐   ┌─────┐   ┌─────┐            
- *          │idx-1│◄─►│ idx │◄─►│idx+1│            
- *          └─────┘   └─────┘   └─────┘            
- *                                                 
+ *                    ┌─────┐
+ *                    │ node│
+ *                    └─────┘
+ *          ┌─────┐   ┌─────┐   ┌─────┐
+ *          │idx-1│◄─►│ idx │◄─►│idx+1│
+ *          └─────┘   └─────┘   └─────┘
+ *
  *  1. Set new `node` `prev` to the node at idx - 1
- *  2. Set new `node` `next` to the node at idx    
- *  3. Set node at idx - 1 `next` to new `node`    
- *  4. Set node at idx `prev` to the new `node`    
+ *  2. Set new `node` `next` to the node at idx
+ *  3. Set node at idx - 1 `next` to new `node`
+ *  4. Set node at idx `prev` to the new `node`
  *
  * Result:
- *                                                 
- *     ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐       
- *     │idx-1│◄─►│ node│◄─►│ idx │◄─►│idx+1│       
+ *
+ *     ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐
+ *     │idx-1│◄─►│ node│◄─►│ idx │◄─►│idx+1│
  *     └─────┘   └─────┘   └─────┘   └─────┘
  *
  * Finally, the list is now updated with new `node` now at the labeled idx:
- *     
- *     ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐       
- *     │idx-1│◄─►│ idx │◄─►│idx+1│◄─►│idx+2│       
- *     └─────┘   └─────┘   └─────┘   └─────┘       
+ *
+ *     ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐
+ *     │idx-1│◄─►│ idx │◄─►│idx+1│◄─►│idx+2│
+ *     └─────┘   └─────┘   └─────┘   └─────┘
  *
  * @param list pointer to a @ref List
  * @param data pointer to data to put into the @ref List
@@ -182,7 +192,7 @@ void list_insert(List* list, void* data, unsigned int idx);
 /**
  * Swap the data pointers at the specified indices of a @ref List
  *
- * If either indices are larger than the length of the list, return false. 
+ * If either indices are larger than the length of the list, return false.
  *
  * @param list pointer to a @ref List
  * @param idx_a desired index to swap with idx_b
@@ -200,7 +210,7 @@ bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b);
  *
  * @return a pointer to the data at the index of the list, or NULL if out-of-bounds
  */
-void* list_get_at_idx(List *list, unsigned int idx);
+void* list_get_at_idx(List* list, unsigned int idx);
 
 /**
  * Remove a List's node at the specified index
@@ -210,7 +220,7 @@ void* list_get_at_idx(List *list, unsigned int idx);
  *
  * @return `true` if successfully removed, `false` if out-of-bounds
  */
-bool list_remove_at_idx(List *list, unsigned int idx);
+bool list_remove_at_idx(List* list, unsigned int idx);
 
 /**
  * Get the number of elements in a @ref List
